@@ -1,3 +1,39 @@
+# BitcoinRandomness Beacon
+bcvictor, BitcoinRandomnessBeacon README:
+
+Follwing Command to execute BitcoinRandomGen.java main method with maven:
+mvn exec:java -Dexec.args="447119"
+
+
+
+
+Must have MVN installed for project.
+
+Environmental Variables:
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_111.jdk/Contents/Home/jre
+
+M2_HOME=/Users/bennettvictor/downloads/BitcoinRandomProject/src/apache-maven-3.3.9
+export M2_HOME
+export M2_HOME
+
+PATH=$PATH:$JAVA_HOME/bin:$M2_HOME/bin
+export PATH
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Existing JAVA BlockExplorer README,
 #Blockchain API library (Java, v1)
 
 An official Java library for interacting with the Blockchain.info API (Java 1.6 required).
