@@ -1,3 +1,6 @@
+Exiting JAVA Block Explorer license:
+
+
 The MIT License (MIT)
 
 Copyright (c) 2014 Blockchain
