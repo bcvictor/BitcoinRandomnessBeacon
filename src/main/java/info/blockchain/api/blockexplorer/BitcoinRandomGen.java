@@ -178,8 +178,7 @@ public class BitcoinRandomGen
 	public static void main(String[] args)
 	{
 		long targetheight = Long.parseLong(args[0]);
-		byte[] result = BitcoinRandomGen.getRandomAtHeight(targetheight);
-		//String ranbytestostring = new String(BitcoinRandomGen.getRandomAtHeight(targetheight));
+		byte[] result = BitcoinRandomGen.getRandomVerificationAtHeight(targetheight)[PROBABALISTIC_VERIFICATION_CHECKPOINTS - 1];
 		System.out.println(Arrays.toString(result));
 	}
 }
