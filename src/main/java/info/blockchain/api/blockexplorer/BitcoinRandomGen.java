@@ -25,9 +25,10 @@ NOTE: Split into primary verification-randomgen, returns 2d byte arrow containin
 so that normal users can probabalistically verify. Child function no-verification-randomgen which only calls actual
 function and returns the last byte array (actual output of beacon).
 
-/* USAGE:  */         
+/* USAGE:    mvn exec:java -Dexec.args="477400"      */
 /* ------------------------------------------------------------------------------ */
-/* EXAMPLE:                                                                       */
+/* EXAMPLE: [14, 32, 105, -61, 37, -41, 43, 52, 76, -4, -5, -29, 68, -85, -47, 65, 
+-98, 82, -108, 46, -119, 83, -84, -106, -70, 53, 61, 13, 90, -87, 67, -15]                                                                      */
 /*                                                                                */
 /**********************************************************************************/
 package info.blockchain.api.blockexplorer;
@@ -37,9 +38,9 @@ import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
 public class BitcoinRandomGen
 {
-	public static final int HASH_ITERATIONS = 10000000;
-	public static final int PROBABALISTIC_VERIFICATION_CHECKPOINTS = HASH_ITERATIONS / 10000;
-	public static final int VERIFICAITON_HASH_DISTANCE = PROBABALISTIC_VERIFICATION_CHECKPOINTS / HASH_ITERATIONS;
+	public static final int HASH_ITERATIONS = 10000;
+	public static final int PROBABALISTIC_VERIFICATION_CHECKPOINTS = (HASH_ITERATIONS / 100) + 1;
+	public static final int VERIFICAITON_HASH_DISTANCE = HASH_ITERATIONS / 100;
 	public BitcoinRandomGen()
 	{
 	}
@@ -95,15 +96,15 @@ public class BitcoinRandomGen
 		prf.update(timebytes);
 		byte[][] beaconresult = new byte[PROBABALISTIC_VERIFICATION_CHECKPOINTS][];
 		beaconresult[0] = prf.eval(noncebytes);
+		PRF seedprf = new PRF(beaconresult[0]);
 		// at this point the beacon seed should be dependant on the merkle root, nonce, and time of target block.
 		byte[] tempbeacon = beaconresult[0];
-
 		// Iterative hash function to make hash computationally expensive to promote security properties
 
 		int counter = VERIFICAITON_HASH_DISTANCE;
 		for (int x = 1; x <= HASH_ITERATIONS; x++)
 		{
-			tempbeacon = prf.eval(tempbeacon);
+			tempbeacon = seedprf.eval(tempbeacon);
 			if (x == counter)
 			{
 				beaconresult[counter / VERIFICAITON_HASH_DISTANCE] = tempbeacon;
@@ -177,8 +178,16 @@ public class BitcoinRandomGen
 
 	public static void main(String[] args)
 	{
+		System.out.println("Probabalistic verification checkpoints: " + PROBABALISTIC_VERIFICATION_CHECKPOINTS);
+		System.out.println("Verification Distance:" + VERIFICAITON_HASH_DISTANCE);
+
 		long targetheight = Long.parseLong(args[0]);
-		byte[] result = BitcoinRandomGen.getRandomVerificationAtHeight(targetheight)[PROBABALISTIC_VERIFICATION_CHECKPOINTS - 1];
-		System.out.println(Arrays.toString(result));
+		byte[][] checklist = BitcoinRandomGen.getRandomVerificationAtHeight(targetheight);
+		//byte[] result = checklist[PROBABALISTIC_VERIFICATION_CHECKPOINTS - 1];
+		//System.out.println(Arrays.toString(result);
+
+		BitcoinBeaconVerification bitbecverification = new BitcoinBeaconVerification();
+		int[] verif = bitbecverification.getProbabalisticVerification(checklist);
+		System.out.println(Arrays.toString(verif));
 	}
 }
