@@ -38,9 +38,9 @@ import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
 public class BitcoinRandomGen
 {
-	public static final int HASH_ITERATIONS = 10000;
-	public static final int PROBABALISTIC_VERIFICATION_CHECKPOINTS = (HASH_ITERATIONS / 100) + 1;
-	public static final int VERIFICAITON_HASH_DISTANCE = HASH_ITERATIONS / 100;
+	public static final int HASH_ITERATIONS = 1000000;
+	public static final int PROBABALISTIC_VERIFICATION_CHECKPOINTS = (HASH_ITERATIONS / 1000) + 1;
+	public static final int VERIFICAITON_HASH_DISTANCE = HASH_ITERATIONS / 1000;
 	public BitcoinRandomGen()
 	{
 	}
@@ -115,67 +115,6 @@ public class BitcoinRandomGen
 
 	}
 
-	public static byte[] getRandomAtHeight(long tarheight)
-	{
-		BlockExplorer bexp = new BlockExplorer();
-		LatestBlock curblock;
-		try {
-			curblock = bexp.getLatestBlock();
-		}
-		catch (Exception e)
-		{
-			System.out.println("Server error");
-			return null;
-		}
-		long curheight = curblock.getHeight();
-		while (curheight != tarheight)
-		{
-			try {
-			curblock = bexp.getLatestBlock();
-			}
-			catch (Exception e)
-			{
-				System.out.println("Server error");
-				return null;
-			}
-			curheight = curblock.getHeight();
-			System.out.println(curheight);
-		}
-
-		// Now our curblock should be the target block
-		Block tarblock;
-		try {
-			tarblock = bexp.getBlock(curblock.getHash());
-		}
-		catch (Exception e)
-		{
-			System.out.println("Server error");
-			return null;
-		}
-		String merkle = tarblock.getMerkleRoot();
-
-		byte[] key = merkle.getBytes(StandardCharsets.UTF_8);
-		PRF prf = new PRF(key);
-
-		long nonce = tarblock.getNonce();
-		byte[] noncebytes = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(nonce).array();
-
-		long time = tarblock.getTime();
-		byte[] timebytes = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(time).array();
-
-		prf.update(timebytes);
-		byte[] beaconresult = prf.eval(noncebytes);
-		// at this point the beacon seed should be dependant on the merkle root, nonce, and time of target block.
-
-
-		// Iterative hash function to make hash computationally expensive to promote security properties
-		for (int x = 1; x <= HASH_ITERATIONS; x++)
-		{
-			beaconresult = prf.eval(beaconresult);
-		}
-		return beaconresult;
-	}
-
 	public static void main(String[] args)
 	{
 		System.out.println("Probabalistic verification checkpoints: " + PROBABALISTIC_VERIFICATION_CHECKPOINTS);
@@ -183,8 +122,8 @@ public class BitcoinRandomGen
 
 		long targetheight = Long.parseLong(args[0]);
 		byte[][] checklist = BitcoinRandomGen.getRandomVerificationAtHeight(targetheight);
-		//byte[] result = checklist[PROBABALISTIC_VERIFICATION_CHECKPOINTS - 1];
-		//System.out.println(Arrays.toString(result);
+		byte[] result = checklist[PROBABALISTIC_VERIFICATION_CHECKPOINTS - 1];
+		System.out.println(Arrays.toString(result));
 
 		BitcoinBeaconVerification bitbecverification = new BitcoinBeaconVerification();
 		int[] verif = bitbecverification.getProbabalisticVerification(checklist);
